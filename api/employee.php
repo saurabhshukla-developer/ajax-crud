@@ -1,5 +1,4 @@
 <?php
-
 require 'db.php';
 
 class Employee extends DBConnection{
@@ -11,6 +10,10 @@ class Employee extends DBConnection{
         $this->conn = $instance->getConnection();
     }
 
+    /**
+     * @method listEmployee (List all employee details)
+     * @return array $row
+     */
     public function listEmployee()
     {
         $sql = "select * from employees";
@@ -19,6 +22,10 @@ class Employee extends DBConnection{
         return $row;
     }
 
+    /**
+     * @method showSingleEmployee (Show single employee details)
+     * @return array $row
+     */
     public function showSingleEmployee($empId)
     {
         $sql = "select * from employees where id = $empId";
@@ -30,6 +37,27 @@ class Employee extends DBConnection{
         return $row;
     }
 
+    /**
+     * @method storeEmployeeDetails (Store Employee Details)
+     * @param array $data 
+     * @return boolean
+     */
+    public function storeEmployeeDetails($data)
+    {
+        $sql = "insert into employees (name, email, mobile, designation, salary) values ('".$data['name']."','".$data['email']."','".$data['mobile']."','".$data['designation']."','".$data['salary']."');";
+        if($this->conn->query($sql) === TRUE){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    
+    /**
+     * @method updateEmployee (Update Employee Details)
+     * @param array $data 
+     * @return boolean
+     */
     public function updateEmployee($data)
     {
         $sql = "update employees set name = '".$data['name']."', email = '".$data['email']."',mobile = '".$data['mobile']."',designation = '".$data['designation']."',salary = '".$data['salary']."' where id = ".$data['id']."";
@@ -40,6 +68,11 @@ class Employee extends DBConnection{
         }
     }
 
+    /**
+     * @method deleteEmployee (Delete Employee Details)
+     * @param array $empId 
+     * @return boolean
+     */
     public function deleteEmployee($empId)
     {
         $sql = "delete from employees where id = ".$empId;
@@ -50,13 +83,3 @@ class Employee extends DBConnection{
         }
     }
 }
-
-// $employee = new Employee();
-// $data['id'] = 3;
-// $data['name'] = 'Chnage User';
-// $data['email'] = 'newemail1@gmail.com';
-// $data['mobile'] = '2525252525';
-// $data['designation'] = 'new desg';
-// $data['salary'] = '85858585';
-
-// print_r($employee->deleteEmployee(3));
