@@ -23,8 +23,8 @@
                     <a class="btn btn-primary" id="btn-add-employee-modal" href="#add_employee" data-toggle="modal">
                         Add Employee
                     </a>
-                    <a class="btn btn-primary" href="http://localhost/saurabh/ajax-crud/api/export-to-csv.php">
-                        Export To .CSV
+                    <a class="btn btn-primary" href="http://localhost/saurabh/ajax-crud/api/exporttoxls.php">
+                        Export To .XLS
                     </a>
                 </div>
             </div>
