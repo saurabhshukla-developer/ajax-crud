@@ -16,7 +16,7 @@ class Employee extends DBConnection{
      */
     public function listEmployee()
     {
-        $sql = "select * from employees";
+        $sql = "select * from employees order by created_at desc";
         $result = mysqli_query($this->conn,$sql);
         $row = mysqli_fetch_all($result,MYSQLI_ASSOC);
         return $row;

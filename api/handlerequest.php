@@ -33,7 +33,7 @@ switch($_SERVER['REQUEST_METHOD']){
         $data['designation'] = $_POST['designation'];
         $data['salary'] = $_POST['salary'];
         if(isset($_POST['operation']) && $_POST['operation'] == 'update'){
-            $data['id'] = $_POST['id'];
+            $data['id'] = $_POST['emp_id'];
             $data = updateEmployee($data);
             echo json_encode($data);
         } else {

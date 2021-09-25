@@ -23,7 +23,7 @@
                     <a class="btn btn-primary" id="btn-add-employee-modal" href="#add_employee" data-toggle="modal">
                         Add Employee
                     </a>
-                    <a class="btn btn-primary" href="">
+                    <a class="btn btn-primary" href="http://localhost/saurabh/ajax-crud/api/export-to-csv.php">
                         Export To .CSV
                     </a>
                 </div>
@@ -92,7 +92,7 @@
                                         </div>                        
                                     </div>
                                     <input type="hidden" name="operation">
-                                    <input type="hidden" name="id">
+                                    <input type="hidden" name="emp_id">
                                 </form>
                             </div>
                         </div> <!--row end-->
@@ -132,11 +132,11 @@
                 $('.modal-title').text('Edit Employee Details');
                 $('.button-add-edit').text('Save');
                 $('#add-employee-form').attr('action', "http://localhost/saurabh/ajax-crud/api/handlerequest.php");
-                $('input[name=operation]').val('edit');
+                $('input[name=operation]').val('update');
 
                 index = $(this).attr('data-index');
                 console.log(index);
-                $('input[name=id]').val(all_employee_details[index].id);
+                $('input[name=emp_id]').val(all_employee_details[index].id);
                 $('input[name=name]').val(capitalizeFirstLetter(all_employee_details[index].name));
                 $('input[name=email]').val(all_employee_details[index].email);
                 $('input[name=mobile]').val(all_employee_details[index].mobile);
@@ -164,7 +164,7 @@
                         console.log('response : ', response);
                         $( "#close-modal" ).trigger( "click" );
                         showAllEmployee();
-                        if(operation == 'edit')
+                        if(operation == 'update')
                         {
                             swal("Poof!", "Employee has been updated successfully", "success");
                         }
@@ -175,7 +175,14 @@
                     error: function()
                     {
                         $( "#close-modal" ).trigger( "click" );
-                        swal("oops!", "Could not add Employee, try adding again", "error");
+                        if(operation == 'update')
+                        {
+                            swal("oops!", "Could not update Employee, try adding again", "error");
+                        }
+                        else
+                        {
+                            swal("oops!", "Could not add Employee, try adding again", "error");
+                        }
                     } 
                 });
             });
@@ -199,7 +206,7 @@
                         $.ajax({
                             method: 'get',
                             url: url,
-                            data: {id: employee_id, operation:'delete'},
+                            data: {emp_id: employee_id, operation:'delete'},
                             success: function(response)
                             {
                                 console.log('delete response : ',response);
@@ -266,7 +273,6 @@
                 });
             }
             console.log('sfsjfkd : ',all_employee_details);
-
 
             function capitalizeFirstLetter(string){
                 return string.charAt(0).toUpperCase() + string.slice(1);
