@@ -1,3 +1,6 @@
+<?php
+    $baseURL = 'http://localhost/saurabh/ajax-crud/';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +26,7 @@
                     <a class="btn btn-primary" id="btn-add-employee-modal" href="#add_employee" data-toggle="modal">
                         Add Employee
                     </a>
-                    <a class="btn btn-primary" href="http://localhost/saurabh/ajax-crud/api/exporttoxls.php">
+                    <a class="btn btn-primary" href="<?php echo $baseURL;?>api/exporttoxls.php">
                         Export To .XLS
                     </a>
                 </div>
@@ -66,14 +69,17 @@
                                         <div class="col-md-4 form-group">
                                             <label for="name">Name</label><span class="text-danger">*</span>
                                             <input name="name" type="text" class="form-control" placeholder="Employee Name" required>
+                                            <span id="name_error" class="text-danger"></span>
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label for="email">Email</label><span class="text-danger">*</span>
                                             <input name="email" type="email" class="form-control" placeholder="employee@company.com" required>
+                                            <span id="email_error" class="text-danger"></span>
                                         </div>      
                                         <div class="col-md-4 form-group">
                                             <label for="mobile">Mobile</label><span class="text-danger">*</span>
                                             <input name="mobile" type="text" class="form-control" placeholder="+91" required>
+                                            <span id="mobile_error" class="text-danger"></span>
                                         </div>              
                                         <div class="col-md-4 form-group">
                                             <label for="designation">Designation</label><span class="text-danger">*</span>
@@ -84,11 +90,13 @@
                                                 <option value="junior developer">Junior Developer</option>
                                                 <option value="intern" selected>Intern</option>
                                             </select>
+                                            <span id="designation_error" class="text-danger"></span>
                                         </div>         
                                         <div class="col-md-4 form-group">
                                             <label for="salary">Salary</label><span class="text-danger">*</span>
                                             <input name="salary" type="number" class="form-control" placeholder="6" required>
                                             <small class="font-italic">Lakhs Per Anum(INR)</small>
+                                            <span id="salary_error" class="text-danger"></span>
                                         </div>                        
                                     </div>
                                     <input type="hidden" name="operation">
@@ -112,6 +120,7 @@
     <script>
         $(document).ready(function()
         {
+            var baseURL = "<?php echo $baseURL;?>";
             var all_employee_details = '';
             showAllEmployee();
             
@@ -120,7 +129,7 @@
                 $('#add-employee-form').trigger("reset");
                 $('.modal-title').text('Add New Employee');
                 $('.button-add-edit').text('Save');
-                $('#add-employee-form').attr('action', "http://localhost/saurabh/ajax-crud/api/handlerequest.php");
+                $('#add-employee-form').attr('action', baseURL+"api/handlerequest.php");
                 $('input[name=operation]').val('add');
                 $('input[name=id]').val('');
             });
@@ -128,14 +137,13 @@
             $(document).on("click",".edit-employee",function()
             {
                 $('#add-employee-form').trigger("reset");
-                console.log('clicked');
                 $('.modal-title').text('Edit Employee Details');
                 $('.button-add-edit').text('Save');
-                $('#add-employee-form').attr('action', "http://localhost/saurabh/ajax-crud/api/handlerequest.php");
+                $('#add-employee-form').attr('action', baseURL+"api/handlerequest.php");
                 $('input[name=operation]').val('update');
 
+                // Add values in form
                 index = $(this).attr('data-index');
-                console.log(index);
                 $('input[name=emp_id]').val(all_employee_details[index].id);
                 $('input[name=name]').val(capitalizeFirstLetter(all_employee_details[index].name));
                 $('input[name=email]').val(all_employee_details[index].email);
@@ -147,12 +155,52 @@
             $(document).on('click','.button-add-edit', function(e)
             {
                 e.preventDefault();
+
+                var name = $.trim($('input[name=name]').val());
+                var email = $('input[name=email]').val();
+                var mobile = $('input[name=mobile]').val();
+                var salary = $('input[name=salary]').val();
+                var designation = $('select[name=designation]').val();
+                var errors = {};
+                error_display = ['name_error', 'email_error', 'salary_error', 'mobile_error', 'designation_error'];
+                for(let i=0; i<error_display.length; i++)
+                {
+                    $('#'+error_display[i]).text('');
+                }
+
+                if(!name)
+                {
+                    errors['name_error'] = 'Please Enter Valid Name';
+                }
+                if(!email)
+                {
+                    errors['email_error'] = 'Please Enter Valid Email';
+                }
+                if(mobile.length == 0 || mobile.length != 10)
+                {
+                    errors['mobile_error'] = 'Mobile Number should be 10 digits long';
+                }
+                if(!salary)
+                {
+                    errors['salary_error'] = 'Please Enter Valid Salary';
+                }
+                if(!designation)
+                {
+                    errors['designation_error'] = 'Please Enter Valid Designation';
+                }
+                if(!$.isEmptyObject(errors))
+                {
+                    $.each(errors, function (i){
+                        $('#'+i).text(errors[i]);
+                    });
+                    errors = {};
+                    return;
+                }
+
                 var url = $('#add-employee-form').attr('action');
                 var operation = $('input[name=operation]').val();
-                console.log(url);
                 var form_id = $('#add-employee-form');
                 var data =  $('#add-employee-form').serialize();
-                console.log(data);
                 $.ajax({
                     method: "post",
                     url: url,
@@ -161,7 +209,6 @@
                     dataType: 'json',
                     success: function(response)
                     {
-                        console.log('response : ', response);
                         $( "#close-modal" ).trigger( "click" );
                         showAllEmployee();
                         if(operation == 'update')
@@ -190,8 +237,7 @@
             $(document).on('click','.delete-btn', function()
             {
                 var employee_id = $(this).attr('data-id');				
-                console.log(employee_id);
-                url = "http://localhost/saurabh/ajax-crud/api/handlerequest.php";
+                url = baseURL+"api/handlerequest.php";
                 swal({
                     title: "Are you sure?",
                     text: "Once deleted, you will not be able to recover Employee!",
@@ -209,7 +255,6 @@
                             data: {emp_id: employee_id, operation:'delete'},
                             success: function(response)
                             {
-                                console.log('delete response : ',response);
                                 swal("Poof!", "Employee has been deleted successfully", "success");
                                 showAllEmployee();	
                             },
@@ -226,26 +271,23 @@
             {
                 $.ajax({
                     type: 'get',
-                    url: 'http://localhost/saurabh/ajax-crud/api/handlerequest.php',
+                    url: 'api/handlerequest.php',
                     async: false,
                     dataType: 'json',
                     success: function(response){
-                        console.log(response);
                         if(response.status != 'success') {
                             swal("oops!", response.message, "error");
                         }
                         else if(response.data == '')
                         {
-                            swal("oops!", 'No Data Found', "warning");
+                            $('#employee-data-tbody').html('<tr class="text-center"><td colspan="7">No data found</td></tr>');
                         }
                         else {
                             var employee_detail = '';
                             all_employee_details = employee_details = response.data;
-                            console.log(employee_details);
 
                             for(i=0; i<employee_details.length; i++)
                             {
-                                console.log(employee_details[i].id);
                                 employee_detail += 
                                         `<tr>
                                             <td>`+(i+1)+`</td>
@@ -268,11 +310,10 @@
                         }           
                     },
                     error: function(){
-                        swal("oops!", "Could not get data", "error");
+                        $('#employee-data-tbody').html('Some error occurred, please try again in some time');
                     }
                 });
             }
-            console.log('sfsjfkd : ',all_employee_details);
 
             function capitalizeFirstLetter(string){
                 return string.charAt(0).toUpperCase() + string.slice(1);
