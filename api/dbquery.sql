@@ -13,10 +13,10 @@ create table employees(
 );
 
 INSERT into `employees` (`name`, `email`, `mobile`, `designation`, `salary`) values
-('user1', 'user1@gmail.com', '142536625', 'hr', '100000'),
-('user2', 'user2@gmail.com', '122142234', 'developer', '1023000'),
-('user3', 'user3@gmail.com', '142534564', 'ceo', '12323400'),
-('user4', 'user4@gmail.com', '142522222', 'lead', '10234324'),
-('user5', 'user5@gmail.com', '142511111', 'manager', '1043566'),
-('user6', 'user6@gmail.com', '142536232', 'servent', '1003456');
+('user1', 'user1@gmail.com', '142536625', 'team lead', '10'),
+('user2', 'user2@gmail.com', '122142234', 'senior developer', '6'),
+('user3', 'user3@gmail.com', '142534564', 'junior developer', '3.5'),
+('user4', 'user4@gmail.com', '142522222', 'intern', '2.5'),
+('user5', 'user5@gmail.com', '142511111', 'manager', '16'),
+('user6', 'user6@gmail.com', '142536232', 'intern', '2.5');
 

@@ -37,7 +37,7 @@
                         <th>Email</th>
                         <th>Mobile</th>
                         <th>Designation</th>
-                        <th>Salary</th>
+                        <th>Salary(INR)</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -61,7 +61,7 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-md-12 pt-2 mb-1" style="height:fit-content;">
-                                <form action="" method="post" id="add-employee-form" accept-charset="utf-8">
+                                <form action="" method="" id="add-employee-form" accept-charset="utf-8">
                                     <div class="row">
                                         <div class="col-md-4 form-group">
                                             <label for="name">Name</label><span class="text-danger">*</span>
@@ -78,11 +78,11 @@
                                         <div class="col-md-4 form-group">
                                             <label for="designation">Designation</label><span class="text-danger">*</span>
                                             <select class="form-control" name="designation" required>
-                                                <option value="Manager">Manager</option>
-                                                <option value="Team Lead">Team Lead</option>
-                                                <option value="Senior Developer">Senior Developer</option>
-                                                <option value="Junior Developer">Junior Developer</option>
-                                                <option value="Intern" selected>Intern</option>
+                                                <option value="manager">Manager</option>
+                                                <option value="team lead">Team Lead</option>
+                                                <option value="senior developer">Senior Developer</option>
+                                                <option value="junior developer">Junior Developer</option>
+                                                <option value="intern" selected>Intern</option>
                                             </select>
                                         </div>         
                                         <div class="col-md-4 form-group">
@@ -91,6 +91,8 @@
                                             <small class="font-italic">Lakhs Per Anum(INR)</small>
                                         </div>                        
                                     </div>
+                                    <input type="hidden" name="operation">
+                                    <input type="hidden" name="id">
                                 </form>
                             </div>
                         </div> <!--row end-->
@@ -110,43 +112,65 @@
     <script>
         $(document).ready(function()
         {
+            var all_employee_details = '';
             showAllEmployee();
             
             $('#btn-add-employee-modal').click(function()
             {
+                $('#add-employee-form').trigger("reset");
                 $('.modal-title').text('Add New Employee');
                 $('.button-add-edit').text('Save');
-                $('#add-employee-form').attr('action', "#");
+                $('#add-employee-form').attr('action', "http://localhost/saurabh/ajax-crud/api/handlerequest.php");
+                $('input[name=operation]').val('add');
+                $('input[name=id]').val('');
             });
 
             $(document).on("click",".edit-employee",function()
             {
+                $('#add-employee-form').trigger("reset");
                 console.log('clicked');
                 $('.modal-title').text('Edit Employee Details');
                 $('.button-add-edit').text('Save');
-                $('#add-employee-form').attr('action', "#");
+                $('#add-employee-form').attr('action', "http://localhost/saurabh/ajax-crud/api/handlerequest.php");
+                $('input[name=operation]').val('edit');
+
+                index = $(this).attr('data-index');
+                console.log(index);
+                $('input[name=id]').val(all_employee_details[index].id);
+                $('input[name=name]').val(capitalizeFirstLetter(all_employee_details[index].name));
+                $('input[name=email]').val(all_employee_details[index].email);
+                $('input[name=mobile]').val(all_employee_details[index].mobile);
+                $('input[name=salary]').val(all_employee_details[index].salary);
+                $('select[name=designation]').val(all_employee_details[index].designation);
             });
 
             $(document).on('click','.button-add-edit', function(e)
             {
                 e.preventDefault();
                 var url = $('#add-employee-form').attr('action');
+                var operation = $('input[name=operation]').val();
                 console.log(url);
                 var form_id = $('#add-employee-form');
                 var data =  $('#add-employee-form').serialize();
                 console.log(data);
                 $.ajax({
-                    method: 'post',
+                    method: "post",
                     url: url,
                     data: data,
-                    // async: false,
-                    // dataType: 'json',
+                    async: false,
+                    dataType: 'json',
                     success: function(response)
                     {
-                        $( "#close-modal" ).trigger( "click" );			
-                        showAllEmployee();	
-                        swal("Poof!", "Employee has been added successfully", "success");
-                        // $('#add_room').hide();
+                        console.log('response : ', response);
+                        $( "#close-modal" ).trigger( "click" );
+                        showAllEmployee();
+                        if(operation == 'edit')
+                        {
+                            swal("Poof!", "Employee has been updated successfully", "success");
+                        }
+                        else{
+                            swal("Poof!", "Employee has been added successfully", "success");
+                        }
                     },
                     error: function()
                     {
@@ -158,10 +182,9 @@
 
             $(document).on('click','.delete-btn', function()
             {
-                var guestid = $(this).val();				
-                console.log(guestid);
-                url = "";
-                console.log(url);
+                var employee_id = $(this).attr('data-id');				
+                console.log(employee_id);
+                url = "http://localhost/saurabh/ajax-crud/api/handlerequest.php";
                 swal({
                     title: "Are you sure?",
                     text: "Once deleted, you will not be able to recover Employee!",
@@ -173,13 +196,13 @@
                 {
                     if (willDelete) 
                     {
-                        $.ajax
-                        ({
-                            method: 'post',
+                        $.ajax({
+                            method: 'get',
                             url: url,
-                            data: {id: guestid},
+                            data: {id: employee_id, operation:'delete'},
                             success: function(response)
                             {
+                                console.log('delete response : ',response);
                                 swal("Poof!", "Employee has been deleted successfully", "success");
                                 showAllEmployee();	
                             },
@@ -194,80 +217,61 @@
 
             function showAllEmployee()
             {
-                // $.ajax({
-                //     type: 'post',
-                //     url: 'https://technologyrevision.com/pgmanager/PG_Guests/employee_details',
-                //     async: false,
-                //     dataType: 'json',
-                //     success: function(data){
-                //         console.log(data);
-                        var employee_detail = '';
-                //         var pg_detail = '';
-                //         var floor_detail = '';
-                //         var i;
-                //         $('#all-contacts').find('input').remove();
-                //         employee_details = data.employee_details;
-                        employee_details = [
-                            {
-                                name:           "Amisha Jain",
-                                email:          "jainamisha566@gmail.com",
-                                mobile:         "8959471500",
-                                designation:    "Senior Developer",
-                                salary:         "6 LPA"
-                            },
-                            {
-                                name:           "Saurabh Shukla",
-                                email:          "saurabhshukla.developer@gmail.com",
-                                mobile:         "9119145983",
-                                designation:    "Manager",
-                                salary:         "16 LPA"
-                            },
-                            {
-                                name:           "Amisha Only",
-                                email:          "amishaonly@gmail.com",
-                                mobile:         "7845128956",
-                                designation:    "Intern",
-                                salary:         "2.5 LPA"
-                            },
-                            {
-                                name:           "Saurabh Only",
-                                email:          "saurabhonly@gmail.com",
-                                mobile:         "4845128956",
-                                designation:    "Junior Developer",
-                                salary:         "3.5 LPA"
-                            }
-                        ];
-
-
-                        for(i=0; i<employee_details.length; i++)
-                        {
-                            console.log(employee_details[i].c_name);
-                            employee_detail += 
-                                    `<tr>
-                                        <td>`+(i+1)+`</td>
-                                        <td>`+employee_details[i].name+`</td>
-                                        <td>`+employee_details[i].email+`</td>
-                                        <td>`+employee_details[i].mobile+`</td>
-                                        <td>`+employee_details[i].designation+`</td>
-                                        <td>`+employee_details[i].salary+`</td>
-                                        <td>
-                                            <a data-id="`+employee_details[i].id+`" class="btn btn-sm btn-info edit-employee" href="#add_employee" data-toggle="modal">
-                                                Edit
-                                            </a>
-                                            <button data-id="`+employee_details[i].id+`" class="btn btn-sm btn-danger delete-btn">
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>`;
-                            $('#all-contacts').append('<input type="hidden" name="all_contact_input[]" value="'+employee_details[i].mobile+'">');
+                $.ajax({
+                    type: 'get',
+                    url: 'http://localhost/saurabh/ajax-crud/api/handlerequest.php',
+                    async: false,
+                    dataType: 'json',
+                    success: function(response){
+                        console.log(response);
+                        if(response.status != 'success') {
+                            swal("oops!", response.message, "error");
                         }
-                        $('#employee-data-tbody').html(employee_detail);                        
-                //     },
-                //     error: function(){
-                //         swal("oops!", "Could not get data", "error");
-                //     }
-                // });
+                        else if(response.data == '')
+                        {
+                            swal("oops!", 'No Data Found', "warning");
+                        }
+                        else {
+                            var employee_detail = '';
+                            all_employee_details = employee_details = response.data;
+                            console.log(employee_details);
+
+                            for(i=0; i<employee_details.length; i++)
+                            {
+                                console.log(employee_details[i].id);
+                                employee_detail += 
+                                        `<tr>
+                                            <td>`+(i+1)+`</td>
+                                            <td>`+capitalizeFirstLetter(employee_details[i].name)+`</td>
+                                            <td>`+employee_details[i].email+`</td>
+                                            <td>`+employee_details[i].mobile+`</td>
+                                            <td>`+capitalizeFirstLetter(employee_details[i].designation)+`</td>
+                                            <td>`+employee_details[i].salary+` LPA</td>
+                                            <td>
+                                                <a data-id="`+employee_details[i].id+`" data-index="`+i+`" class="btn btn-sm btn-info edit-employee" href="#add_employee" data-toggle="modal">
+                                                    Edit
+                                                </a>
+                                                <button data-id="`+employee_details[i].id+`"  data-index="`+i+`" class="btn btn-sm btn-danger delete-btn">
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>`;
+                            }
+                            $('#employee-data-tbody').html(employee_detail);
+                        }           
+                    },
+                    error: function(){
+                        swal("oops!", "Could not get data", "error");
+                    }
+                });
             }
+            console.log('sfsjfkd : ',all_employee_details);
+
+
+            function capitalizeFirstLetter(string){
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
         });
     </script>
 </body>
